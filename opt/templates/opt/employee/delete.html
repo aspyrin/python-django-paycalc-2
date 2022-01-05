@@ -1,0 +1,36 @@
+﻿{% extends "base_generic.html" %}
+
+{% block content %}
+
+{# уведомления #}
+{% if msg %}
+<div class="alert alert-danger" role="alert">
+    <p>{{ msg }}</p>
+</div>
+{% endif %}
+
+{# заголовок страницы #}
+<div>
+    <h2>{{ title }}</h2>
+    <p><strong>ФИО:</strong> {{ employee_obj.empl_name }}</p>
+    <p><strong>ИНН:</strong> {{ employee_obj.inn }}</p>
+    <p><strong>Таб номер:</strong> {{ employee_obj.tab_number }}</p>
+    <p><strong>Должность по ШР:</strong> {{ employee_obj.position }}</p>
+    <p><strong>Мотивационная роль:</strong> {{ employee_obj.motivationRole }}</p>
+    <p><strong>Принят:</strong> {{ employee_obj.start_date }}</p>
+    <p><strong>Уволен:</strong> {{ employee_obj.end_date }}</p>
+    <p><strong>Примечание: </strong> {{ employee_obj.note }}</p>
+    <p><strong>Создатель: </strong> {{ employee_obj.creator }}</p>
+    <p><strong>Создан: </strong> {{ employee_obj.insertDateTime }}</p>
+</div>
+
+{# форма #}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row mb-3">
+        <button type="submit" class="btn btn-secondary" name="btn_cancel">Отмена</button>
+        <button type="submit" class="btn btn-danger" name="btn_delete">Удалить</button>
+    </div>
+</form>
+
+{% endblock %}

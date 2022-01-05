@@ -1,0 +1,44 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{% load static %}
+
+{# уведомления #}
+{% if msg %}
+<div class="alert alert-danger" role="alert">
+    {{ msg }}
+</div>
+{% endif %}
+
+{# заголовок страницы #}
+<div>
+    <h2>{{ title }}</h2>
+    <p>{{ annotation }}</p>
+</div>
+
+{# табличная часть #}
+<div style="margin-left:20px;margin-top:20px">
+    {% if ntcs %}
+    <table class="table table-sm table-striped">
+        {# данные таблицы #}
+        <tbody class="table">
+            {% for n in ntcs %}
+            <tr>
+                <th>
+                    <h4>{{ n.title }}</h4>
+                    <h5>{{ n.content }}</h5>
+                    <h6>{{ n.published|date:"d.m.Y. H:i:s"}}   ( {{ n.creator }} )</h6>
+                </th>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Нет новостей в базе данных для данного филиала.</p>
+    {% endif %}
+</div>
+
+{# Пагинатор #}
+{% include "../pagination.html" with obj_list=ntcs cur_page_num=page_num fltr=fltr_str %}
+
+{% endblock %}

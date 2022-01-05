@@ -1,0 +1,111 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    {# уведомления #}
+    {% if msg %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>"PayCalc"</strong> {{ msg }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endif %}
+    
+    {# заголовок страницы #}
+    <div>
+        <h2>{{ period_obj.period_type }}</h2>
+        <h4><strong>За период с:</strong> {{ period_obj.start_date }}<strong> по: </strong>{{ period_obj.end_date }}</h4>
+        <p><strong>Примечание:</strong> {{ period_obj.note }}</p>
+        <p><strong>Создано:</strong> {{ period_obj.creator }} ({{ period_obj.insertDateTime }})</p>
+    </div>
+    
+    <h4>Расчеты по сотрудникам:</h4>
+    
+    {# панель кнопок #}
+    <div style="margin-left:10px;margin-top:20px">
+        <div>
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                    <a class="btn btn-primary" href="#" role="button" name="properties">Свойства периода</a>
+
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Создать расчеты по сотрудникам >>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <li><button type="submit" class="btn btn-secondary" name="createEmplcalcAll">Добавить всех активных</button></li>
+                            <li><button type="submit" class="btn btn-secondary" name="createEmplcalcDisabled">Добавить уволенных в данном периоде</button></li>
+                            <li><a class="dropdown-item" href="#">Выбрать из списка</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Импорт данных >>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <li><a class="dropdown-item" href="#">Табель (Excel)</a></li>
+                            <li><a class="dropdown-item" href="#">KPI (Excel)</a></li>
+                            <li><a class="dropdown-item" href="#">Операции (Excel)</a></li>
+                            <li><a class="dropdown-item" href="#">Операции (ВЕ)</a></li>
+                            <li><a class="dropdown-item" href="#">Премии/доплаты/штрафы (Excel)</a></li>
+                            <li><a class="dropdown-item" href="#">Больничные/отпуска (Excel)</a></li>
+                            <li><a class="dropdown-item" href="#">Инвентаризация (Excel)</a></li>
+                        </div>
+                    </div>
+                    <a class="btn btn-primary" href="#" role="button" name="report">Расчетная ведомость</a>
+                </div>
+                {#<input type="submit" name="create_emplcalcs" value="Создать расчеты по сотрудникам" />#}
+            </form>
+        </div>
+
+        {# табличная часть #}
+        <div style="margin-left:10px;margin-top:20px">
+            {% if emplcalcs %}
+            <table class="table table-sm table-striped">
+                {# названия полей #}
+                <thead style="background-color:lightgray">
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Сотрудник</th>
+                        <th scope="col">Мотивационная роль</th>
+                        <th scope="col">База</th>
+                        <th scope="col">KPI</th>
+                        <th scope="col">Сдельно</th>
+                        <th scope="col">Дотация</th>
+                        <th scope="col">Премии</th>
+                        <th scope="col">Доплаты</th>
+                        <th scope="col">Удержано</th>
+                        <th scope="col">ВСЕГО</th>
+                        <th scope="col">Удалить</th>
+                    </tr>
+                </thead>
+                {# данные таблицы #}
+                <tbody class="table">
+                {% for emplclc in emplcalcs %}
+                    <tr>
+                        <th scope="row">{{ emplclc.pk }}</th>
+                        <td><a href="{{ emplclc.get_absolute_url }}">{{ emplclc.employee }}</a></td>
+                        <td>{{ emplclc.motivationRole }}</td>
+                        <td>0.00 грн.</td>
+                        <td>0.00 грн.</td>
+                        <td>0.00 грн.</td>
+                        <td>0.00 грн.</td>
+                        <td>0.00 грн.</td>
+                        <td>0.00 грн.</td>
+                        <td>0.00 грн.</td>
+                        <td>0.00 грн.</td>
+                        <td><a href="#">Удалить</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p>Нет расчетов по сотрудникам в данном периоде.</p>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

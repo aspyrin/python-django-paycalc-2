@@ -1,0 +1,67 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h2>Расчетные периоды филиала</h2>
+
+    {# панель кнопок #}
+    <div style="margin-left:20px; margin-top:20px">
+        <div>
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="btn-group" role="group">
+                    <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Создать
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                        <li><a class="dropdown-item" href="add?period_type_id=1">ЗАРАБОТНАЯ ПЛАТА (расчеты по активным сотрудникам)</a></li>
+                        <li><a class="dropdown-item" href="add?period_type_id=2">АВАНС (расчеты по активным сотрудникам)</a></li>
+                        <li><a class="dropdown-item" href="add?period_type_id=3">УВОЛЬНЕНИЕ (расчеты по уволенным сотрудникам)</a></li>
+                        <li><a class="dropdown-item" href="#">Создать пустой период</a></li>
+                    </div>
+                </div>
+                {#<input type="submit" name="create_emplcalcs" value="Создать расчеты по сотрудникам" />#}
+            </form>
+        </div>
+    </div>
+
+    {# табличная часть #}
+    {% if period_list %}
+        <div style="margin-left:20px;margin-top:20px">
+            <table class="table table-sm table-striped">
+                {# названия полей #}
+                <thead style="background-color:lightgray">
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Тип периода</th>
+                        <th scope="col">Начало</th>
+                        <th scope="col">Окончание</th>
+                        <th scope="col">Всего начислено</th>
+                        <th scope="col">Примечание</th>
+                        <th scope="col">Действия</th>
+                    </tr>
+                </thead>
+                {# данные таблицы #}
+                <tbody class="table">
+                    {% for p in period_list %}
+                        <tr>
+                            <th scope="row">{{ p.pk }}</th>
+                            <td><a href="{{ p.get_absolute_url }}">{{ p.period_type }}</a></td>
+                            <td>{{ p.start_date|date:"d.m.Y."}}</td>
+                            <td>{{ p.end_date|date:"d.m.Y."}}</td>
+                            <td>0,00 грн.</td>
+                            <td>{{ p.note}}</td>
+                            <td>
+                                <a href="{{ p.get_absolute_url }}edit/">Изменить</a>
+                                <a href="{{ p.get_absolute_url }}delete/">Удалить</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            {% else %}
+              <p>Нет периодов в базе данных.</p>
+            {% endif %}
+        </table>
+    </div>
+
+{% endblock %}
+

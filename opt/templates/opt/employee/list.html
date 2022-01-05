@@ -1,0 +1,137 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{% load static %}
+
+{# уведомления #}
+{% if msg %}
+<div class="alert alert-danger" role="alert">
+    {{ msg }}
+</div>
+{% endif %}
+
+{# заголовок страницы #}
+<div>
+    <h2>{{ title }}</h2>
+    <p>{{ annotation }}</p>
+</div>
+
+{# панель кнопок #}
+<div class="container-fluid">
+    <div class="row" style="padding-top: 7px; padding-bottom: 7px; margin-top: 0px; margin-bottom: 0px; background-color: #e1f0fd;">
+        <div class="col-xs-1">
+            <form name="actions" action="" method="post">
+                {% csrf_token %}
+                <div class="btn-group" role="group" aria-label="actionGroup">
+                    <a href="add"><img src="{% static 'Images/'%}add-26.png" alt="Добавить" style="width:26px; height:26px" ;></a>
+                </div>
+            </form>
+        </div>
+        <div class="col-xs-11">
+            <form name="filters" action="" method="get">
+                {% csrf_token %}
+                <div class="input-group" role="group" aria-label="filterGroup">
+                    Фильтры:
+                    {% for field in fltr_form %}
+                    {{field}}
+                    {% endfor %}
+                    <button type="button" onclick="filterApply()" role="button" name="btn_filter_apply">
+                        <img src="{% static 'Images/'%}filter_apply-26.png" alt="Применить фильтр" style="width:20px; height:20px;" />
+                        <span class="badge">{{ fltr_count }}</span>
+                    </button>
+                    <button type="button" onclick="filterClear()" role="button" name="btn_filter_clear">
+                        <img src="{% static 'Images/'%}filter_clear-26.png" alt="Сбросить фильтр" style="width:20px; height:20px;" />
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# табличная часть #}
+<div style="margin-left:20px;margin-top:20px">
+    <table class="table table-sm table-striped">
+        {% if employee_list %}
+        {# названия полей #}
+        <thead style="background-color:lightgray">
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">ФИО</th>
+                <th scope="col">ИНН</th>
+                <th scope="col">Таб номер</th>
+                <th scope="col">Должность</th>
+                <th scope="col">Принят</th>
+                <th scope="col">Уволен</th>
+                <th scope="col">Примечание</th>
+                <th scope="col">Действия</th>
+            </tr>
+        </thead>
+        {# данные таблицы #}
+        <tbody class="table">
+            {% for e in employee_list %}
+            <tr>
+                <th scope="row">{{ e.pk }}</th>
+                <td><a href="{{ e.get_absolute_url }}">{{ e.empl_name }}</a></td>
+                <td>{{ e.inn}}</td>
+                <td>{{ e.tab_number}}</td>
+                <td>{{ e.position}}</td>
+                <td>{{ e.start_date|date:"d.m.Y."}}</td>
+                <td>{{ e.end_date|date:"d.m.Y."}}</td>
+                <td>{{ e.note}}</td>
+                <td>
+                    <a href="{{ e.get_absolute_url }}edit/">
+                        <img src="{% static 'Images/'%}edit-20.png" alt="Изменить" style="width:20px;height:20px;">
+                    </a>
+                    <a href="{{ e.get_absolute_url }}delete/">
+                        <img src="{% static 'Images/'%}delete-20.png" alt="Удалить" style="width:20px;height:20px;">
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% else %}
+        <p>Нет сотрудников в базе данных, либо измените условия поиска.</p>
+        {% endif %}
+    </table>
+</div>
+
+{# Пагинатор #}
+{% include "../../pagination.html" with obj_list=employee_list cur_page_num=page_num fltr=fltr_str %}
+
+<script>
+    function filterApply() {
+        let form = document.forms.filters;
+        let status = form.elements.status;
+        let name = form.elements.name;
+        let inn = form.elements.inn;
+        let tabnum = form.elements.tabnum;
+        let roleid = form.elements.roleid;
+        var strURL = '?page=1';
+        if (status.value != '') {
+            strURL += '&status=' + status.value
+        }
+        if (name.value != '') {
+            strURL += '&name=' + name.value
+        }
+        if (inn.value != '') {
+            strURL += '&inn=' + inn.value
+        }
+        if (tabnum.value != '') {
+            strURL += '&tabnum=' + tabnum.value
+        }
+        if (roleid.value != '') {
+            strURL += '&roleid=' + roleid.value
+        }
+        if (strURL != '?') {
+            window.location.href = strURL;
+            return true;
+        }
+    }
+    function filterClear() {
+        var strURL = '?page=1';
+        window.location.href = strURL;
+        return true;
+    }
+</script>
+
+{% endblock %}

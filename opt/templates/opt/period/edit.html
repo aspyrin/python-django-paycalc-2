@@ -1,0 +1,38 @@
+﻿{% extends "base_generic.html" %}
+
+{% block content %}
+
+{# уведомления #}
+{% if msg %}
+<div class="alert alert-danger" role="alert">
+    {{ msg }}
+</div>
+{% endif %}
+
+{# заголовок страницы #}
+<div>
+    <h2>{{ title }}</h2>
+    <p>{{ annotation }}</p>
+</div>
+
+{# форма #}
+<form action="" method="post">
+    {% csrf_token %}
+    <div>
+        {% for field in form %}
+        <div class="form-group">
+            {{field.label_tag}}
+            <div>{{field}}</div>
+            {% for error in field.errors %}
+            <div class="alert alert-danger">{{error}}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="row mb-3">
+        <button type="submit" class="btn btn-secondary" name="btn_cancel">Отмена</button>
+        <button type="submit" class="btn btn-success" name="btn_save">Сохранить</button>
+    </div>
+</form>
+
+{% endblock %}

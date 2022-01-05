@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  {% block title %}<title>Управление заработной платой</title>{% endblock %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- Добавление дополнительного статического CSS файла -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <script type="text/javascript" src={% static "JavaScript/main.js" %}></script>
+</head>
+
+<body class="my-login">
+    <div id="container">
+        <!-- Хедер -->
+        <div id="header">
+            <div id="branding">
+                <h1 id="site-name">
+                    <a href="/accounts/login/" style="color: #eaeaea" >Аутентификация PayCalc</a>
+                </h1>
+            </div>
+        </div>
+        <!-- Контент -->
+        <div id="content" class="colM">
+	        <div id="content-main">
+                {% block content %}{% endblock %}
+        	</div>
+        <br class="clear">
+        </div>
+        <!-- Футер -->
+        <div id="footer">
+
+        </div>
+    </div>
+</body>
+</html>

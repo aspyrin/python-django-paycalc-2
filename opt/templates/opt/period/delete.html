@@ -1,0 +1,28 @@
+﻿{% extends "base_generic.html" %}
+
+{% block content %}
+
+{# уведомления #}
+{% if msg %}
+<div class="alert alert-danger" role="alert">
+    <p>{{ msg }}</p>
+</div>
+{% endif %}
+
+{# заголовок страницы #}
+<div>
+    <h2>{{ title }}</h2>
+    <p><strong>c </strong> {{ period_obj.start_date }} <strong> по </strong> {{ period_obj.end_date }}</p>
+    <p><strong>примечание: </strong> {{ period_obj.note }}</p>
+</div>
+
+{# форма #}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row mb-3">
+        <button type="submit" class="btn btn-secondary" name="btn_cancel">Отмена</button>
+        <button type="submit" class="btn btn-danger" name="btn_delete">Удалить</button>
+    </div>
+</form>
+
+{% endblock %}

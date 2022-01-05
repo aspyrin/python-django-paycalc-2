@@ -1,0 +1,12 @@
+{% extends "core_generic.html" %}
+
+{% block content %}
+    <div>
+	    <h1 align="center">Перейти в раздел сайта:</h1>
+    </div>
+	{% for b in branches %}
+	<div>
+        <p><a class="btn btn-default btn-lg btn-block" href="{{ b.app_url }}">{{ b.title }}</a></p>
+	</div>
+	{% endfor %}
+{% endblock %}

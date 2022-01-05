@@ -1,0 +1,10 @@
+{% extends "base_registration.html" %}
+
+{% block content %}
+<div class="form-elem-msg">
+    <p>Вы вышли из логина!</p>
+</div>
+<div class="form-elem-msg">
+    <a href="{% url 'login'%}">Кликните здесь, чтобы войти снова.</a>
+</div>
+{% endblock %}

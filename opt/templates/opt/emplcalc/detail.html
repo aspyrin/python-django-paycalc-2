@@ -1,0 +1,104 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    {# уведомления #}
+    {% if msg %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>"PayCalc"</strong> {{ msg }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endif %}
+
+    <div style="background-color:beige">
+        <h1>Расчет по сотруднику (id= {{ emplcalc_obj.id }} )</h1>
+        <p><strong>Сотрудник:</strong> <a href="{{ emplcalc_obj.employee.get_absolute_url }}">{{ emplcalc_obj.employee }}</a></p> <!-- переход на сотрудника -->
+        <p><strong>Мотивационная роль:</strong> <a href="{{ emplcalc_obj.motivationRole.get_absolute_url }}">{{ emplcalc_obj.motivationRole }}</a></p> <!-- переход на мотивационную роль -->
+        <p> 
+            <button id="emplcalc_showlog_btn" class="btn btn-secondary collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#emplcalc_showlog_collapse_area" aria-expanded="false" aria-controls="emplcalc_showlog_collapse_area">
+                Лог расчета:
+            </button>
+        </p>
+        <div class="collapse" id="emplcalc_showlog_collapse_area">
+            <div class="card card-body" style="background-color:aliceblue; margin-left: 10px;">
+                {{ emplcalc_obj.note|linebreaksbr }}
+            </div>
+        </div>
+    </div>
+    
+
+
+    <div style="margin-left:20px;margin-top:20px">
+        <div>
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Создать .... >>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <li><button type="submit" class="btn btn-secondary" name="createEmplcalcAll">кнопка 1....</button></li>
+                            <li><button type="submit" class="btn btn-secondary" name="createEmplcalcDisabled">кнопка 2....</button></li>
+                            <li><a class="dropdown-item" href="#">кнопка 3....</a></li>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <div style="background-color:burlywood">
+            <h4>Базовый модуль:</h4>
+            <p><strong>Исходное значение окладной части:</strong> {{ ecAssembly.bmc_Obj.inputValue }} </p>
+        </div>
+
+    </div>
+
+    <script>
+        let btn = document.getElementById('emplcalc_showlog_btn');
+        let aria = document.getElementById('emplcalc_showlog_collapse_area');
+        btn.onclick = function () {
+            if (btn.getAttribute('aria-expanded') == 'false') {
+                aria.className = "collapse show";
+                unfade(aria);
+                btn.className = 'btn btn-secondary';
+                btn.setAttribute('aria-expanded', 'true');
+            } else {
+                fade(aria);
+                aria.className = "collapse";
+                btn.className = 'btn btn-secondary collapsed';
+                btn.setAttribute('aria-expanded', 'false');
+            }    
+        };
+
+        function fade(element) {
+            var op = 1;  // initial opacity
+            var timer = setInterval(function () {
+                if (op <= 0.1) {
+                    clearInterval(timer);
+                    element.style.display = 'none';
+                }
+                element.style.opacity = op;
+                element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+                op -= op * 0.1;
+            }, 10);
+        }
+
+        function unfade(element) {
+            var op = 0.1;  // initial opacity
+            element.style.display = 'block';
+            var timer = setInterval(function () {
+                if (op >= 1) {
+                    clearInterval(timer);
+                }
+                element.style.opacity = op;
+                element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+                op += op * 0.1;
+            }, 10);
+        }
+    </script>
+
+{% endblock %}

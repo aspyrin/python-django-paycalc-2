@@ -1,0 +1,50 @@
+{% extends "base_registration.html" %}
+
+{% block content %}
+
+<div class="form-elem-msg">
+    {% if form.errors %}
+      <p>Ваше имя пользователя и пароль не совпадают. Пожалуйста, попробуйте еще раз.</p>
+    {% endif %}
+
+    {% if next %}
+      {% if user.is_authenticated %}
+        <p>У вашей учетной записи нет доступа к этой странице. Чтобы продолжить,
+         пожалуйста, войдите с учетной записью, у которой есть доступ.</p>
+      {% else %}
+        <p>Пожалуйста, авторизируйтесь, чтобы увидеть эту страницу.</p>
+      {% endif %}
+    {% endif %}
+</div>
+
+<form method="post" action="{% url 'login' %}" id="login-form">
+    {% csrf_token %}
+    <div class="form-row">
+        <div class="form-elem-lbl">
+            {{ form.username.label_tag }}
+        </div>
+        <div class="form-elem-fld">
+            {{ form.username }}
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-elem-lbl">
+            {{ form.password.label_tag }}
+        </div>
+        <div class="form-elem-fld">
+            {{ form.password }}
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-elem-btn">
+            <input type="submit" class="btn btn-primary btn-lg" value="Войти">
+            <input type="hidden" name="next" value="{{ next }}" />
+        </div>
+    </div>
+</form>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+<div class="form-elem-msg">
+    <p><a href="{% url 'password_reset' %}">Забыли пароль?</a></p>
+</div>
+{% endblock %}
