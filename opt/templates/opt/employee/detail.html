@@ -5,23 +5,68 @@
 {# уведомления #}
 {% if msg %}
 <div class="alert alert-danger" role="alert">
-    <p>{{ msg }}</p>
+    {{ msg }}
 </div>
 {% endif %}
 
 {# заголовок страницы #}
 <div>
     <h2>{{ title }}</h2>
-    <h4><strong>ФИО:</strong> {{ employee_obj.empl_name }}</h4>
-    <p><strong>ИНН:</strong> {{ employee_obj.inn }}</p>
-    <p><strong>Таб номер:</strong> {{ employee_obj.tab_number }}</p>
-    <p><strong>Должность по ШР:</strong> {{ employee_obj.position }}</p>
-    <p><strong>Мотивационная роль:</strong> {{ employee_obj.motivationRole }}</p>
-    <p><strong>Принят:</strong> {{ employee_obj.start_date }}</p>
-    <p><strong>Уволен:</strong> {{ employee_obj.end_date }}</p>
-    <p><strong>Примечание: </strong> {{ employee_obj.note }}</p>
-    <p><strong>Создатель: </strong> {{ employee_obj.creator }}</p>
-    <p><strong>Создан: </strong> {{ employee_obj.insertDateTime }}</p>
+    <p>{{ annotation }}</p>
+</div>
+
+{# табличная часть #}
+<div style="margin-left:20px;margin-top:20px">
+    <table class="table table-sm table-striped">
+        {% if employee_obj %}
+        {# названия полей #}
+        {# данные таблицы #}
+        <tbody class="table">
+            <tr>
+                <td><strong>ФИО:</strong></td>
+                <td>{{ employee_obj.empl_name }}</td>
+            </tr>
+            <tr>
+                <td><strong>ИНН:</strong></td>
+                <td>{{ employee_obj.inn }}</td>
+            </tr>
+            <tr>
+                <td><strong>Таб номер:</strong></td>
+                <td>{{ employee_obj.tab_number }}</td>
+            </tr>
+            <tr>
+                <td><strong>Должность по ШР:</strong></td>
+                <td>{{ employee_obj.position }}</td>
+            </tr>
+            <tr>
+                <td><strong>Мотивационная роль:</strong></td>
+                <td>{{ employee_obj.motivationRole }}</td>
+            </tr>
+            <tr>
+                <td><strong>Принят:</strong></td>
+                <td>{{ employee_obj.start_date }}</td>
+            </tr>
+            <tr>
+                <td><strong>Уволен:</strong></td>
+                <td>{{ employee_obj.end_date }}</td>
+            </tr>
+            <tr>
+                <td><strong>Примечание:</strong></td>
+                <td>{{ employee_obj.note }}</td>
+            </tr>
+            <tr>
+                <td><strong>Создатель:</strong></td>
+                <td>{{ employee_obj.creator }}</td>
+            </tr>
+            <tr>
+                <td><strong>Создан:</strong></td>
+                <td>{{ employee_obj.insertDateTime }}</td>
+            </tr>
+        </tbody>
+        {% else %}
+        <p>Ошибка. Сотрудник не найден.</p>
+        {% endif %}
+    </table>
 </div>
 
 {# форма #}
