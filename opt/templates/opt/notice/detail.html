@@ -1,0 +1,56 @@
+﻿{% extends "base_generic.html" %}
+
+{% block content %}
+
+{# уведомления #}
+{% if msg %}
+<div class="alert alert-danger" role="alert">
+    {{ msg }}
+</div>
+{% endif %}
+
+{# заголовок страницы #}
+<div>
+    <h2>{{ title }}</h2>
+    <p>{{ annotation }}</p>
+</div>
+
+{# табличная часть #}
+<div style="margin-left:20px;margin-top:20px">
+    <table class="table table-sm table-striped">
+        {% if notice_obj %}
+        {# названия полей #}
+        {# данные таблицы #}
+        <tbody class="table">
+            <tr>
+                <td><strong>Тема:</strong></td>
+                <td>{{ notice_obj.title }}</td>
+            </tr>
+            <tr>
+                <td><strong>Сообщение:</strong></td>
+                <td>{{ notice_obj.content }}</td>
+            </tr>
+            <tr>
+                <td><strong>Автор:</strong></td>
+                <td>{{ notice_obj.creator }}</td>
+            </tr>
+            <tr>
+                <td><strong>Создано:</strong></td>
+                <td>{{ notice_obj.published }}</td>
+            </tr>
+        </tbody>
+        {% else %}
+        <p>Ошибка. Сообщение не найдено.</p>
+        {% endif %}
+    </table>
+</div>
+
+{# форма #}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row mb-3">
+        <button type="submit" class="btn btn-secondary" name="btn_close">Закрыть</button>
+    </div>
+</form>
+
+{% endblock %}
