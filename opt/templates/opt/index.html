@@ -25,6 +25,7 @@
             {% for n in ntcs %}
             <tr>
                 <th>
+                    <h4><a href="/opt/notice/{{ n.pk }}/">{{ n.title }}</a></h4>
                     <h4>{{ n.title }}</h4>
                     <h5>{{ n.content }}</h5>
                     <h6>{{ n.published|date:"d.m.Y. H:i:s"}}   ( {{ n.creator }} )</h6>
