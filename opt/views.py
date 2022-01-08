@@ -89,6 +89,31 @@ def index(request):
                                                 'annotation': annotation,
                                                 'msg': msg})
 
+@login_required
+@group_required('buh','opt')
+def notice_detail(request, id):
+    try:
+        # передаем в шаблон данные
+        notice_obj = Notice.objects.get(pk=id)
+        user = request.user
+        title = "Сообщение"
+        annotation = "Только для просмотра сотрудниками Опта."
+        msg = None
+
+        # обработка пост-запросов
+        if request.method == "POST":  # если POST
+            # нажатие на кнопку "Закрыть"
+            if 'btn_close' in request.POST:
+                return redirect('index')
+
+        else:  # если GET
+            return render(request, "opt/notice/detail.html", {'notice_obj': notice_obj,
+                                                            'title': title,
+                                                            'annotation': annotation,
+                                                            'msg':msg})
+    except Notice.DoesNotExist:
+        raise Http404("Сообщение не найдено")
+
 # расчетные периоды
 def period_list(request):
     periods = Period.objects.all()
@@ -405,6 +430,7 @@ def employee_detail(request, id):
         employee_obj = Employee.objects.get(pk=id)
         user = request.user
         title = "Данные по сотруднику"
+        annotation = "Только для просмотра."
         msg = None
         # emplcalcs = employee_obj.empl_calcs.all()
 
@@ -417,10 +443,10 @@ def employee_detail(request, id):
         else:  # если GET
             return render(request, "opt/employee/detail.html", {'employee_obj': employee_obj,
                                                             'title': title,
+                                                            'annotation': annotation,
                                                             'msg':msg})
     except Employee.DoesNotExist:
         raise Http404("Сотрудник не найден")
-
 
 @login_required
 @group_required('buh')
