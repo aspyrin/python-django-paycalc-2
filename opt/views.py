@@ -16,6 +16,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 # from django.views.generic.base import View
 # from django.views.generic import TemplateView
 
+# сериализатор наборов запросов to-python Django
+from django.core import serializers
+
 # модели данных
 from django.contrib.auth.models import User
 from django.db.models import Q
