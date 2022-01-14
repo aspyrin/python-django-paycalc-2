@@ -12,3 +12,14 @@ from opt.models import Position
 def index(request):
     branches = Branches.objects.all()
     return render(request, "core/index.html", {'branches': branches})
+
+
+#def model_form_upload(request):
+#    if request.method == 'POST
+#        form = DocumentForm(request.POST, request.FILES)
+#        if form.is_valid
+#            form.save
+#            return redirect('index')
+#        else:
+#            form = DocumentForm()
+#        return render(request, )
