@@ -26,7 +26,7 @@ class EditPeriodForm(forms.Form):
     field_order = ["start_date", "end_date", "note"]
 
 class EmployeeForm(ModelForm):
-  
+
     class Meta:
         model = Employee
         fields = ('empl_name',
@@ -57,20 +57,20 @@ class EmployeeForm(ModelForm):
 class EmployeeFilterForm(forms.Form):
     status = forms.ChoiceField(label='Статус', choices=[('active','Активные'), ('archive','Уволенные'),('none','-статус-'),],
                                required=False)
-    name = forms.CharField(label='ФИО', 
+    name = forms.CharField(label='ФИО',
                            required=False,
                            widget=forms.TextInput(attrs={'placeholder': '-Фио-'}))
-    inn = forms.CharField(label='ИНН', 
+    inn = forms.CharField(label='ИНН',
                           required=False,
                           widget=forms.TextInput(attrs={'placeholder': '-инн-'}))
-    tabnum = forms.CharField(label='Таб.№', 
+    tabnum = forms.CharField(label='Таб.№',
                              required=False,
                              widget=forms.TextInput(attrs={'placeholder': '-таб.№-'}))
-    roleid = forms.ChoiceField(label='Мотив.роль', 
-                               choices=[('none','---мотивационная роль---')] + [(choice.pk, choice.role_name) for choice in MotivationRole.objects.all()], 
+    roleid = forms.ChoiceField(label='Мотив.роль',
+                               choices=[('none','---мотивационная роль---')] + [(choice.pk, choice.role_name) for choice in MotivationRole.objects.all()],
                                required=False)
     field_order = ['status', 'name', 'inn', 'tabnum', 'roleid']
-    
+
     status.widget.attrs.update({'class': 'fltr_field_1'})
     name.widget.attrs.update({'class': 'fltr_field_2', })
     inn.widget.attrs.update({'class': 'fltr_field_3'})
