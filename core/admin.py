@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Branches
 from .models import Notice
-
+from .models import NoticiesDocs
 
 @admin.register(Branches)
 class BranchesAdmin(admin.ModelAdmin):
@@ -20,3 +20,15 @@ class NoticeAdmin(admin.ModelAdmin):
         obj.user = request.user
         obj.set_creator(obj.user)
         super(NoticeAdmin, self).save_model(request, obj, form, change)
+
+@admin.register(NoticiesDocs)
+class NoticiesDocsAdmin(admin.ModelAdmin):
+    list_display = ('notice', 'first_name', 'document', 'published', 'creator', )
+    readonly_fields = ('published', 'creator',)
+    list_display_links = ('first_name',)
+
+    def save_model(self, request, obj, form, change):
+        obj.user = request.user
+        obj.set_creator(obj.user)
+        obj.first_name = obj.document.name
+        super(NoticiesDocsAdmin, self).save_model(request, obj, form, change)
