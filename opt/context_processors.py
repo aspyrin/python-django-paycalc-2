@@ -4,7 +4,7 @@ from django.db.models import Q
 # модели
 from opt.models import MainMenue
 
-# функция возвращает пункты меню для текущего пользователя
+# функция возвращает список пунктов меню для текущего пользователя
 def sidebarmenue(request):
     user = request.user # текущий пользователь
     if user.is_authenticated:
@@ -29,3 +29,12 @@ def sidebarmenue(request):
             return {"menue_list": menue_list}
     else:
         return {"menue_list": MainMenue.objects.filter(menue_access='')}
+
+# функция выделяет из текущего URL строку адреса для выделения пункта меню
+def sidebarmenue_item_selected(request):
+    s = '/opt/' # значение по умолчанию
+    if request.path.find('/opt/period/', 0, 1000) == 0:
+        s = '/opt/period/'
+    if request.path.find('/opt/employee/', 0, 1000) == 0:
+        s = '/opt/employee/'
+    return {"menue_item_selected": s}
