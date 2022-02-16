@@ -23,6 +23,7 @@ from django.core import serializers
 from django.contrib.auth.models import User
 from django.db.models import Q
 from core.models import Notice
+from core.models import NoticiesDocs
 from opt.models import Period
 from opt.models import PeriodType
 from opt.models import Employee
@@ -54,12 +55,10 @@ def group_required(*group_names):
 @login_required
 @group_required('buh','opt')
 def index(request):
-
     user = request.user
     title = "Лента новостей филиала"
-    annotation = "В данной ленте новостей показан только контент, предназначенный для пользователей сайта ОПТ."
+    annotation = "В данной ленте новостей показан только контент, предназначенный для пользователей сайта Днепр-ОПТ."
     msg = None
-
     # получаем значения параметров из строки запроса
     page_param = request.GET.get('page')
     if page_param != 'none':
@@ -68,7 +67,6 @@ def index(request):
         cur_page_num = 1
     notices = Notice.objects.filter(filial__id='1')    # фильтр по Днепр-Опт
     paginator = Paginator(notices, 10)  # 10 строк на каждой странице
-
     try:
         obj_list_paginated = paginator.page(cur_page_num)
     except PageNotAnInteger:
@@ -77,12 +75,10 @@ def index(request):
     except EmptyPage:
         # Если страница больше максимальной, доставить последнюю страницу результатов
         obj_list_paginated = paginator.page(paginator.num_pages)
-
     # собираем строку фильтра для пагинатора
     # вычисляем количество включенных фильтров
     fltr_str = ""
     fltr_count = 0
-
     # return render(request, "opt/index.html", {'ntcs': notices})
     return render(request, "opt/index.html", {'ntcs': obj_list_paginated,
                                                 # 'fltr_form': fltr_form,
@@ -98,22 +94,20 @@ def notice_detail(request, id):
     try:
         # передаем в шаблон данные
         notice_obj = Notice.objects.get(pk=id)
+        doc_list = NoticiesDocs.objects.filter(notice=id)
         user = request.user
         title = "Сообщение"
         annotation = "Только для просмотра сотрудниками Опта."
         msg = None
-
-        # обработка пост-запросов
-        if request.method == "POST":  # если POST
-            # нажатие на кнопку "Закрыть"
-            if 'btn_close' in request.POST:
-                return redirect('index')
-
-        else:  # если GET
+        return_path  = request.META.get('HTTP_REFERER')
+        # обработка запросов
+        if request.method == "GET":
             return render(request, "opt/notice/detail.html", {'notice_obj': notice_obj,
+                                                            'doc_list': doc_list,
                                                             'title': title,
                                                             'annotation': annotation,
-                                                            'msg':msg})
+                                                            'msg': msg,
+                                                            'ret_url': return_path})
     except Notice.DoesNotExist:
         raise Http404("Сообщение не найдено")
 
@@ -135,33 +129,20 @@ def period_add(request):
         msg = None
         # обработка пост-запросов
         if request.method == "POST":  # если POST
-
             # нажатие на кнопку "Добавить"
             if 'btn_add' in request.POST:
                 # Создаём экземпляр формы и заполняем данными из запроса (связывание, binding):
                 form = AddPeriodForm(request.POST)
                 # Проверка валидности данных формы:
                 if form.is_valid():
-
-                    # Прямая выборка неочищенных данных из формы
-                    # period_obj.start_date = request.POST.get('inputStartDate')
-                    # period_obj.end_date = request.POST.get('inputEndDate')
-                    # period_obj.note = request.POST.get('inputNote')
-                    # простой вывод результата на страницу (для тестирования)
-                    # output = request.POST.get('inputStartDate')
-                    # return HttpResponse(output)
-
                     # проверяем что дата конца не меньше даты начала
                     if form.cleaned_data['end_date'] < form.cleaned_data['start_date']:
                         msg = "Окончание периода не может быть ранее чем Начало периода!"
-
                     else:
                         # Передаем в модель очищенные данные из form.cleaned_data
                         period_obj.start_date = form.cleaned_data['start_date']
                         period_obj.end_date = form.cleaned_data['end_date']
                         period_obj.note = form.cleaned_data['note']
-
-
                         # проверка на дубль периода в БД
                         if period_obj.check_duplicate() == True:
                             msg = "Не может быть создано двух периодов с одинаковыми Типом периода, началом периода и Окончанием периода!"
@@ -173,17 +154,14 @@ def period_add(request):
                             # ошибка добавления объекта в БД
                             except PeriodType.DoesNotExist:
                                 msg = "Период не создан. Неизвестная ошибка"
-
             # нажатие на кнопку "Отмена"
             if 'btn_cancel' in request.POST:
                 return redirect('period_list')
-
         else:  # если GET
             # определение даты первого дня текущего месяца
             s_date = datetime.date(datetime.date.today().year, datetime.date.today().month, 1)
             # определение значений полей формы по умолчанию
             form = AddPeriodForm(initial={'start_date': s_date, 'end_date': datetime.date.today(),})
-
         return render(request, "opt/period/add.html", {'form': form,
                                                        'period_obj': period_obj,
                                                        'title': title,
@@ -202,35 +180,22 @@ def period_edit(request, id):
         title = "Редактор периода [" + period_obj.period_type.type_name + "]"
         annotation = "Укажите даты начала и окончания периода (обязательно) и примечание (необязательно). Дата окончания не может быть раньше даты начала. Тип периода изменить нельзя."
         msg = None
-
         # обработка пост-запросов
         if request.method == "POST":  # если POST
-
             # нажатие на кнопку "Добавить"
             if 'btn_save' in request.POST:
                 # Создаём экземпляр формы и заполняем данными из запроса (связывание, binding):
                 form = EditPeriodForm(request.POST)
                 # Проверка валидности данных формы:
                 if form.is_valid():
-
-                    # Прямая выборка неочищенных данных из формы
-                    # period_obj.start_date = request.POST.get('inputStartDate')
-                    # period_obj.end_date = request.POST.get('inputEndDate')
-                    # period_obj.note = request.POST.get('inputNote')
-                    # простой вывод результата на страницу (для тестирования)
-                    # output = request.POST.get('inputStartDate')
-                    # return HttpResponse(output)
-
                     # проверяем что дата конца не меньше даты начала
                     if form.cleaned_data['end_date'] < form.cleaned_data['start_date']:
                         msg = "Окончание периода не может быть ранее чем Начало периода!"
-
                     else:
                         # Передаем в модель очищенные данные из form.cleaned_data
                         period_obj.start_date = form.cleaned_data['start_date']
                         period_obj.end_date = form.cleaned_data['end_date']
                         period_obj.note = form.cleaned_data['note']
-
                         # пытаемся добавить объект в БД
                         try:
                             period_obj.save()
@@ -238,16 +203,13 @@ def period_edit(request, id):
                         # ошибка добавления объекта в БД
                         except PeriodType.DoesNotExist:
                             msg = "Период не сохранен. Неизвестная ошибка"
-
             # нажатие на кнопку "Отмена"
             if 'btn_cancel' in request.POST:
                 return redirect('period_list')
-
         else:  # если GET
                 form = EditPeriodForm(initial={'start_date': period_obj.start_date,
                                                'end_date': period_obj.end_date,
                                                'note': period_obj.note,})
-
         return render(request, "opt/period/edit.html", {'period_obj': period_obj,
                                                         'form': form,
                                                         'title': title,
@@ -264,26 +226,20 @@ def period_delete(request, id):
         user = request.user
         title = "Удаление периода [" + period_obj.period_type.type_name + "]"
         msg = None
-
         # обработка пост-запросов
         if request.method == "POST":  # если POST
-
             # нажатие на кнопку "Удалить"
             if 'btn_delete' in request.POST:
                 period_obj.delete()
                 return redirect('period_list')
-
             # нажатие на кнопку "Отмена"
             if 'btn_cancel' in request.POST:
                 return redirect('period_list')
-
         else:  # если GET
             msg = "Внимание! Будет удален период и все связанные с ним расчеты по сорудникам. Восстановление данных будет невозможно"
-
         return render(request, "opt/period/delete.html", {'period_obj': period_obj,
                                                           'title': title,
                                                           'msg':msg})
-
     except PeriodType.DoesNotExist:
         raise Http404("Период не найден")
 
@@ -293,14 +249,12 @@ def period_detail(request, id):
         period_obj = Period.objects.get(pk=id)
         emplcalcs = EmployeeCalc.objects.filter(period_id=period_obj.pk)
         user = request.user
-
         # обработка пост-запросов
         if request.method == "POST":  # если POST
             # нажатие на кнопку "Добавить всех активных"
             if 'createEmplcalcAll' in request.POST:
                 period_obj.create_emplcalcs(user)
                 return render(request, 'opt/period/detail.html', {'period_obj': period_obj, 'emplcalcs': emplcalcs, })
-
             # нажатие на кнопку "Добавить всех уволенных"
             elif 'createEmplcalcDisabled' in request.POST:
                 # form = NewVenueForm(request.POST)
@@ -310,10 +264,8 @@ def period_detail(request, id):
                 msg = 'Расчеты по сотрудникам созданы!'
                 return render(request, 'opt/period/detail.html', {'period_obj': period_obj, 'emplcalcs': emplcalcs, 'msg': msg,})
                 # return HttpResponse("<h2>действие_1</h2>") # редирект
-
         else:  # если GET
             return render(request, 'opt/period/detail.html', {'period_obj': period_obj, 'emplcalcs': emplcalcs,})
-
     except Period.DoesNotExist:
         raise Http404("Период не найден")
 
@@ -326,13 +278,11 @@ def emplcalc_detail(request, id):
         user = request.user
         ecAss = AssemblyEmplCalc(emplcalc_obj)
         # ecAss.build()
-
         # обработка пост-запросов
         if request.method == "POST":  # если POST
             pass
         else:  # если GET
             return render(request, 'opt/emplcalc/detail.html', {'emplcalc_obj': emplcalc_obj, 'log_text_br': log_text_br, 'ecAssembly': ecAss,})
-
     except Period.DoesNotExist:
         raise Http404("расчет по сотруднику id=" + str(id) + " не найден")
 
@@ -340,12 +290,10 @@ def emplcalc_detail(request, id):
 @login_required
 @group_required('buh')
 def employee_list(request):
-
     user = request.user
     title = "Сотрудники филиала"
     annotation = "Используйте фильтры для быстрого поиска сотрудника. По умолчанию: только активные."
     msg = None
-
     # получаем значения параметров из строки запроса
     status_param = request.GET.get('status','none')
     name_param = request.GET.get('name','none')
@@ -357,7 +305,6 @@ def employee_list(request):
         cur_page_num = page_param
     else:
         cur_page_num = 1
-
     fltr_cons = list() # список с Q-объектами
     if status_param != 'none':
         if status_param == 'active':
@@ -387,7 +334,6 @@ def employee_list(request):
                                             'roleid': request.GET.get('roleid','none')})
     obj_list_filtered = list_fltr(Employee, fltr_cons)
     paginator = Paginator(obj_list_filtered, 10)  # 10 строк на каждой странице
-
     try:
         obj_list_paginated = paginator.page(cur_page_num)
     except PageNotAnInteger:
@@ -396,7 +342,6 @@ def employee_list(request):
     except EmptyPage:
         # Если страница больше максимальной, доставить последнюю страницу результатов
         obj_list_paginated = paginator.page(paginator.num_pages)
-
     #собираем строку фильтра для пагинатора
     #вычисляем количество включенных фильтров
     fltr_str = ""
@@ -416,7 +361,6 @@ def employee_list(request):
     if roleid_param != "none":
         fltr_str += '&roleid=' + roleid_param
         fltr_count = fltr_count + 1
-
     return render(request, "opt/employee/list.html", {'employee_list': obj_list_paginated,
                                                     'fltr_form': fltr_form,
                                                     'fltr_str': fltr_str,
@@ -435,19 +379,14 @@ def employee_detail(request, id):
         title = "Данные по сотруднику"
         annotation = "Только для просмотра."
         msg = None
-        # emplcalcs = employee_obj.empl_calcs.all()
-
-        # обработка пост-запросов
-        if request.method == "POST":  # если POST
-            # нажатие на кнопку "Закрыть"
-            if 'btn_close' in request.POST:
-                return redirect('employee_list')
-
-        else:  # если GET
+        return_path  = request.META.get('HTTP_REFERER')
+        # обработка запросов
+        if request.method == "GET":
             return render(request, "opt/employee/detail.html", {'employee_obj': employee_obj,
                                                             'title': title,
                                                             'annotation': annotation,
-                                                            'msg':msg})
+                                                            'msg':msg,
+                                                            'ret_url': return_path})
     except Employee.DoesNotExist:
         raise Http404("Сотрудник не найден")
 
@@ -459,14 +398,13 @@ def employee_add(request):
     title = "Добавление нового сотрудника"
     annotation = "Дата увольнения и примечание не обязательно. Дата увольнения не может быть раньше даты приема."
     msg = None
+    return_path  = request.META.get('HTTP_REFERER')
     # обработка пост-запросов
     if request.method == "POST":  # если POST
-
         # нажатие на кнопку "Добавить"
         if 'btn_add' in request.POST:
             # Создаём экземпляр формы и заполняем данными из запроса (связывание, binding):
             form = EmployeeForm(request.POST)
-
             # Проверка валидности данных формы:
             if form.is_valid():
                 # проверка взаимосвязей полей на форме
@@ -479,24 +417,18 @@ def employee_add(request):
                     try:
                         employee_obj.save()
                         return redirect('employee_list')
-
                     # ошибка добавления объекта в БД
                     except Employee.DoesNotExist:
                         msg = "Сотрудник не создан. Неизвестная ошибка"
-
-        # нажатие на кнопку "Отмена"
-        if 'btn_cancel' in request.POST:
-            return redirect('employee_list')
-
     else:  # если GET
         # определение значений полей формы по умолчанию
         form = EmployeeForm(initial={'start_date': datetime.date.today(),})
-
     return render(request, "opt/employee/add.html", {'form': form,
                                                        'employee_obj': employee_obj,
                                                        'title': title,
                                                        'annotation': annotation,
-                                                       'msg':msg})
+                                                       'msg':msg,
+                                                       'ret_url': return_path})
 
 @login_required
 @group_required('buh')
@@ -507,26 +439,20 @@ def employee_delete(request, id):
         user = request.user
         title = "Удаление сотрудника"
         msg = None
-
+        return_path  = request.META.get('HTTP_REFERER')
         # обработка пост-запросов
         if request.method == "POST":  # если POST
-
             # нажатие на кнопку "Удалить"
             if 'btn_delete' in request.POST:
                 employee_obj.delete()
                 return redirect('employee_list')
-
             # нажатие на кнопку "Отмена"
-            if 'btn_cancel' in request.POST:
-                return redirect('employee_list')
-
         else:  # если GET
             msg = "Внимание! Будет удален сотрудник и все связанные с ним расчеты в периодах. Восстановление данных будет невозможно"
-
         return render(request, "opt/employee/delete.html", {'employee_obj': employee_obj,
                                                           'title': title,
-                                                          'msg':msg})
-
+                                                          'msg':msg,
+                                                          'ret_url': return_path})
     except Employee.DoesNotExist:
         raise Http404("Сотрудник не найден")
 
@@ -540,10 +466,9 @@ def employee_edit(request, id):
         title = "Редактор сотрудника"
         annotation = "Дата увольнения и примечание не обязательно. Дата увольнения не может быть раньше даты приема."
         msg = None
-
+        return_path  = request.META.get('HTTP_REFERER')
         # обработка пост-запросов
         if request.method == "POST":  # если POST
-
             # нажатие на кнопку "Сохранить"
             if 'btn_save' in request.POST:
                 # Создаём экземпляр формы и заполняем данными из запроса (связывание, binding):
@@ -560,18 +485,13 @@ def employee_edit(request, id):
                         # ошибка добавления объекта в БД
                         except Employee.DoesNotExist:
                             msg = "Сотрудник не сохранен. Неизвестная ошибка"
-
-            # нажатие на кнопку "Отмена"
-            if 'btn_cancel' in request.POST:
-                return redirect('employee_list')
-
         else:  # если GET
                 form = EmployeeForm(instance=employee_obj)
-
         return render(request, "opt/employee/edit.html", {'employee_obj': employee_obj,
                                                         'form': form,
                                                         'title': title,
                                                         'annotation': annotation,
-                                                        'msg':msg})
+                                                        'msg':msg,
+                                                        'ret_url': return_path})
     except Employee.DoesNotExist:
         raise Http404("Сотрудник не найден")
