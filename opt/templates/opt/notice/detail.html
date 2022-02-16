@@ -1,6 +1,7 @@
 ﻿{% extends "base_generic.html" %}
 
 {% block content %}
+{% load static %}
 
 {# уведомления #}
 {% if msg %}
@@ -15,42 +16,61 @@
     <p>{{ annotation }}</p>
 </div>
 
-{# табличная часть #}
-<div style="margin-left:20px;margin-top:20px">
-    <table class="table table-sm table-striped">
-        {% if notice_obj %}
-        {# названия полей #}
-        {# данные таблицы #}
-        <tbody class="table">
-            <tr>
-                <td><strong>Тема:</strong></td>
-                <td>{{ notice_obj.title }}</td>
-            </tr>
-            <tr>
-                <td><strong>Сообщение:</strong></td>
-                <td>{{ notice_obj.content }}</td>
-            </tr>
-            <tr>
-                <td><strong>Автор:</strong></td>
-                <td>{{ notice_obj.creator }}</td>
-            </tr>
-            <tr>
-                <td><strong>Создано:</strong></td>
-                <td>{{ notice_obj.published }}</td>
-            </tr>
-        </tbody>
+{# основная часть #}
+<div class="container-fluid" style="margin-left:20px;margin-top:20px;">
+    {% if notice_obj %}
+    {# данные по сообщению #}
+    <blockquote>
+        <p><strong>{{ notice_obj.title }}</strong></p>
+        <p>{{ notice_obj.content }}</p>
+        <footer>Опубликовано <cite title="Source Title">{{ notice_obj.published}} ( {{ notice_obj.creator }} )</cite></footer>
+    </blockquote>
+
+    {# связанные документы #}
+    <blockquote>
+        {% if doc_list %}
+        <p><strong>Связанные документы:</strong></p>
+        <table class="table table-condensed">
+            {# названия полей #}
+            <thead style="background-color:lightgray">
+                <tr>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Имя файла</th>
+                    <th scope="col">Добавлен</th>
+                    <th scope="col">Создатель</th>
+                </tr>
+            </thead>
+            {# данные таблицы #}
+            <tbody class="table">
+                {% for doc in doc_list %}
+                <tr>
+                    <td>
+                        <img src="{% static 'Images/'%}{{ doc.ext_ico }}" alt="Расширение файла" style="width:22px; height:auto;"/>
+                    </td>
+                    <td><a href="/media/{{ doc.document }}">{{ doc.first_name }}</a></td>
+                    <td>{{ doc.published }}</td>
+                    <td>{{ doc.creator }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <footer>Всего файлов: <cite title="Source Title">{{ doc_list.count }}</cite></footer>
         {% else %}
-        <p>Ошибка. Сообщение не найдено.</p>
+        <footer>Связанных документов нет <cite title="Source Title"></cite></footer>
         {% endif %}
-    </table>
+    </blockquote>
+
+    {% else %}
+    <p>Ошибка. Сообщение не найдено.</p>
+    {% endif %}
 </div>
 
-{# форма #}
-<form action="" method="post">
-    {% csrf_token %}
-    <div class="row mb-3">
-        <button type="submit" class="btn btn-secondary" name="btn_close">Закрыть</button>
-    </div>
-</form>
-
+{# выход #}
+<div>
+    {% if ret_url %}
+    <a class="btn btn-default" href="{{ ret_url }}" role="button">Вернуться к списку</a>
+    {% else %}
+    <a class="btn btn-default" href="{% url 'index' %}" role="button">Вернуться к списку</a>
+    {% endif %}
+</div>
 {% endblock %}

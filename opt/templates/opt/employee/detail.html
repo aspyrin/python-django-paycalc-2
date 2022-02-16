@@ -69,12 +69,13 @@
     </table>
 </div>
 
-{# форма #}
-<form action="" method="post">
-    {% csrf_token %}
-    <div class="row mb-3">
-        <button type="submit" class="btn btn-secondary" name="btn_close">Закрыть</button>
-    </div>
-</form>
+{# выход #}
+<div>
+    {% if ret_url %}
+    <a class="btn btn-default" href="{{ ret_url }}" role="button">Вернуться к списку</a>
+    {% else %}
+    <a class="btn btn-default" href="{% url 'employee_list' %}" role="button">Вернуться к списку</a>
+    {% endif %}
+</div>
 
 {% endblock %}
