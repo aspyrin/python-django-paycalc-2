@@ -73,6 +73,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 # Пользовательский контекстный процессор
                 'opt.context_processors.sidebarmenue',
+                'opt.context_processors.sidebarmenue_item_selected',
             ],
         },
     },
