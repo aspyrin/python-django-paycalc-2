@@ -28,7 +28,13 @@
 <form action="" method="post">
     {% csrf_token %}
     <div class="row mb-3">
-        <button type="submit" class="btn btn-secondary" name="btn_cancel">Отмена</button>
+        {# cancel #}
+        {% if ret_url %}
+        <a class="btn btn-default" href="{{ ret_url }}" role="button">Отмена</a>
+        {% else %}
+        <a class="btn btn-default" href="{% url 'employee_list' %}" role="button">Отмена</a>
+        {% endif %}
+        {# ok #}
         <button type="submit" class="btn btn-danger" name="btn_delete">Удалить</button>
     </div>
 </form>
