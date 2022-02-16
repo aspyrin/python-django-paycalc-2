@@ -15,6 +15,7 @@ def documents_directory_path(instance, filename):
     new_file_name = 'notice_id_' + str(instance.notice.id) + '_file_id_' + str(instance.unique_id) + '.' + file_extension
     return '{0}/{1}'.format(new_dir_name, new_file_name)
 
+
 # филиалы
 class Branches (models.Model):
     title = models.CharField(max_length=100, blank=False, db_index=True, verbose_name='Название филиала')
@@ -58,9 +59,14 @@ class Notice (models.Model):
         for branch in branches:
             str_value += branch.title + '; '
         return str_value
-    # get_filials_str.admin_order_field = 'title'
     get_filials_str.boolean = False
     get_filials_str.short_description = 'Филиал'
+
+    def get_doc_count(self):
+        docs_count = str(NoticiesDocs.objects.filter(notice=self).count())
+        return docs_count
+    get_doc_count.boolean = False
+    get_doc_count.short_description = 'Вложения'
 
     def set_creator(self, user):
         self.creator = user
@@ -100,9 +106,14 @@ class NoticiesDocs (models.Model):
                                     unique=True,
                                     default=uuid.uuid4,
                                     editable=False)
+    ext_ico = models.CharField(max_length=100,
+                                blank=True,
+                                default='ext_unknown.png',)
+    ext_name = models.CharField(max_length=10,
+                                blank=True,
+                                default='unknown',)
 
     def __str__(self):
-        # return self.document.name
         return self.first_name
 
     def set_creator(self, user):
