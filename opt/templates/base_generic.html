@@ -72,7 +72,7 @@
                 {% block sidebar %}
                 <div class="list-group" id="list-tab" role="tablist">
                     {% for menue_obj in menue_list %}
-                        {% if request.path == menue_obj.menue_url %}
+                        {% if menue_item_selected == menue_obj.menue_url %}
                         <a class="list-group-item list-group-item-action active"
                             id="list-home-list"
                             data-bs-toggle="list"
